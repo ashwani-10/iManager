@@ -16,23 +16,19 @@ public class Mapper {
     PasswordEncoder passwordEncoder;
 
     public  User userMapper(UserRequestDTO userRequestDTO){
-        User user=new User();
 
-        user.setEmail(userRequestDTO.getEmail());
-        user.setName(userRequestDTO.getName());
-        user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
-
-        return user;
+        return User.builder()
+                .name(userRequestDTO.getName())
+                .email(userRequestDTO.getEmail())
+                .password(passwordEncoder.encode(userRequestDTO.getPassword()))
+                .build();
     }
 
     public Organization orgMapper(OrgRequestDTO orgRequestDTO){
-        Organization org = new Organization();
-
-        org.setName(orgRequestDTO.getName());
-        org.setEmail(orgRequestDTO.getEmail());
-        org.setPassword(passwordEncoder.encode(orgRequestDTO.getPassword()));
-        org.setSubscription(orgRequestDTO.getSubscription());
-
-        return org;
+        return Organization.builder()
+                .name(orgRequestDTO.getName())
+                .email(orgRequestDTO.getEmail())
+                .password(passwordEncoder.encode(orgRequestDTO.getPassword()))
+                .build();
     }
 }

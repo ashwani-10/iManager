@@ -2,59 +2,41 @@ package com.example.iManager.service;
 
 import com.example.iManager.exceptions.EmailSendingFailedException;
 import com.example.iManager.exceptions.RegistrationFailedException;
-import com.example.iManager.exceptions.UserAlreadyExistsException;
 import com.example.iManager.kafkaProducerDTO.UserRegistrationMessageDTO;
 import com.example.iManager.model.OTP;
-import com.example.iManager.model.Organization;
 import com.example.iManager.model.User;
-import com.example.iManager.repository.OrgRepository;
-import com.example.iManager.repository.OtpRepository;
-import com.example.iManager.repository.UserRepository;
-import com.example.iManager.requestDTO.LoginRequestDTO;
 import com.example.iManager.requestDTO.UserRequestDTO;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.Random;
-
 @Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    OtpRepository otpRepository;
-    @Autowired
-    OtpService otpService;
-    @Autowired
-    Mapper mapper;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    KafkaProducerService kafkaProducer;
+    private final OtpService otpService;
+    private final Mapper mapper;
+    private final PasswordEncoder passwordEncoder;
+    private final KafkaProducerService kafkaProducer;
 
+    public UserService(OtpService otpService, Mapper mapper,
+                       PasswordEncoder passwordEncoder,
+                       KafkaProducerService kafkaProducer) {
+        this.otpService = otpService;
+        this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
+        this.kafkaProducer = kafkaProducer;
+    }
 
     public void userRegistration(UserRequestDTO request){
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
+        try {
+            User user  = mapper.userMapper(request);
+            OTP otp = otpService.otpGenerator(request.getEmail());
 
-        if(optionalUser.isPresent()){
-            System.out.println("User already exists");
-            throw new UserAlreadyExistsException("User already exists"+request.getEmail());
+//            userRepository.save(user);
+//            otpRepository.save(otp);
+
+            sendVerificationMail(user,otp.getOtp());
+        } catch (Exception e) {
+            throw new RegistrationFailedException("Failed to complete registration",e);
         }
-
-            try {
-                User user  = mapper.userMapper(request);
-                OTP otp = otpService.otpGenerator(request.getEmail());
-
-                userRepository.save(user);
-                otpRepository.save(otp);
-
-                sendVerificationMail(user,otp.getOtp());
-            } catch (Exception e) {
-                throw new RegistrationFailedException("Failed to complete registration",e);
-            }
     }
 
     private void sendVerificationMail(User user,String otp) {
@@ -64,7 +46,6 @@ public class UserService {
                 .email(user.getEmail())
                 .otp(otp)
                 .build();
-
 
         int retries = 3;
 
@@ -86,27 +67,26 @@ public class UserService {
         }
     }
 
-    public void emailVerification(OTP creds) {
-        OTP otp = otpRepository.findByEmail(creds.getEmail());
+//    public void emailVerification(OTP credentials) {
+//        OTP otp = otpRepository.findByEmail(credentials.getEmail());
+//        if(!otp.getOtp().equals(credentials.getOtp())){
+//            throw new RuntimeException("Wrong OTP ");
+//        }
+//        otpRepository.delete(otp);
+//    }
 
-        if(!otp.getOtp().equals(creds.getOtp())){
-            throw new RuntimeException("Wrong OTP ");
-        }
-        otpRepository.delete(otp);
-    }
+//    public boolean userLogin(LoginRequestDTO request){
+//        User user = userRepository.findByEmail(request.getUsername())
+//                .orElseThrow(()-> new RuntimeException("User not found"));
+//        String actualPassword = request.getPassword();
+//        if(passwordEncoder.matches(actualPassword,user.getPassword())){
+//            return true;
+//        }
+//        return false;
+//    }
 
-    public boolean userLogin(LoginRequestDTO request){
-        User user = userRepository.findByEmail(request.getUsername())
-                .orElseThrow(()-> new RuntimeException("User not found"));
-        String actualPassword = request.getPassword();
-        if(passwordEncoder.matches(actualPassword,user.getPassword())){
-            return true;
-        }
-        return false;
-    }
-
-    public void inviteMember(String username, String inviteEmail) {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(()-> new RuntimeException("User not found"));
-    }
+//    public void inviteMember(String username, String inviteEmail) {
+//        User user = userRepository.findByEmail(username)
+//                .orElseThrow(()-> new RuntimeException("User not found"));
+//    }
 }
