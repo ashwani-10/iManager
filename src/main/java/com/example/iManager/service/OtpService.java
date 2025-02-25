@@ -10,11 +10,11 @@ public class OtpService {
 
     public OTP otpGenerator(String email){
         SecureRandom random = new SecureRandom();
-        String OTP = String.valueOf(100000 + random.nextInt(900000));
-        OTP otp = new OTP();
-        otp.setEmail(email);
-        otp.setOtp(OTP);
+        String otp = String.valueOf(100000 + random.nextInt(900000));
 
-        return otp;
+        return OTP.builder()
+                .email(email)
+                .otp(otp)
+                .build();
     }
 }
