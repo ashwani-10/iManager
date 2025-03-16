@@ -26,7 +26,9 @@ public class SecurityConfig {
                 .csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(request-> request.requestMatchers("/api/v1/org/login","/api/v1/user/registration",
                                 "/api/v1/user/email/verification","/api/v1/org/registration",
-                                "/api/payments/create-order").permitAll()
+                                "/api/payments/create-order","/api/v1/org/docker",
+                                "/api/v1/task/create",
+                                "/api/v1/user/registration").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

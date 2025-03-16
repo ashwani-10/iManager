@@ -3,9 +3,9 @@ package com.example.iManager.service;
 import com.example.iManager.exceptions.EmailSendingFailedException;
 import com.example.iManager.exceptions.RegistrationFailedException;
 import com.example.iManager.kafkaProducerDTO.UserRegistrationMessageDTO;
-import com.example.iManager.model.OTP;
 import com.example.iManager.model.User;
 import com.example.iManager.requestDTO.UserRequestDTO;
+import com.example.iManager.util.DbApi;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,25 +15,23 @@ public class UserService {
     private final Mapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final KafkaProducerService kafkaProducer;
+    private final DbApi dbApi;
 
     public UserService(OtpService otpService, Mapper mapper,
                        PasswordEncoder passwordEncoder,
-                       KafkaProducerService kafkaProducer) {
+                       KafkaProducerService kafkaProducer,
+                       DbApi dbApi) {
         this.otpService = otpService;
         this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
         this.kafkaProducer = kafkaProducer;
+        this.dbApi=dbApi;
     }
 
     public void userRegistration(UserRequestDTO request){
         try {
-            User user  = mapper.userMapper(request);
-            OTP otp = otpService.otpGenerator(request.getEmail());
-
-//            userRepository.save(user);
-//            otpRepository.save(otp);
-
-            sendVerificationMail(user,otp.getOtp());
+            request.setPassword(passwordEncoder.encode(request.getPassword()));
+            dbApi.finalizeUser(request);
         } catch (Exception e) {
             throw new RegistrationFailedException("Failed to complete registration",e);
         }

@@ -10,9 +10,9 @@ public interface ApiUtil {
     public ResponseEntity makePostCall(Object requestBody, String endPoint, String apiUrl,
                                        HashMap<String, String > queryParams);
 
-    public Object makePutCall(Object requestBody, String endPoint, String apiUrl,
+    public ResponseEntity makePutCall(Object requestBody, String endPoint, String apiUrl,
                               HashMap<String, String > queryParams);
 
-    public Object makeGetCall(String endPoint, String apiUrl,
+    public ResponseEntity makeGetCall(String endPoint, String apiUrl,
                               HashMap<String, String > queryParams);
 }

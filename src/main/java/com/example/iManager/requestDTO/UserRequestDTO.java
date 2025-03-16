@@ -14,9 +14,5 @@ public class UserRequestDTO {
     String Email;
     @NonNull
     String password;
-    @NonNull
-    Role role;
-    @NonNull
-    String OrgId;
 
 }

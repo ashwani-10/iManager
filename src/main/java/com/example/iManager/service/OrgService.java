@@ -9,11 +9,14 @@ import com.example.iManager.requestDTO.LoginRequestDTO;
 import com.example.iManager.requestDTO.OrgRequestDTO;
 import com.example.iManager.util.DbApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class OrgService {
@@ -23,6 +26,8 @@ public class OrgService {
     private final DbApi dbApi;
     private final PasswordEncoder passwordEncoder;
     private final PaymentService paymentService;
+    @Value("${service.db.url}")
+    private String dbUrl;
 
     public OrgService(OtpService otpService, Mapper mapper, KafkaProducerService kafkaProducer, DbApi dbApi, PasswordEncoder passwordEncoder, PaymentService paymentService) {
         this.otpService = otpService;
@@ -79,18 +84,37 @@ public class OrgService {
     }
 
     public boolean userLogin(LoginRequestDTO request) throws IOException {
-        String endPoint = "http://localhost:8082/db/api/org/get";
+        String endPoint = dbUrl+"/db/api/org/get";
         HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put("orgEmail", request.getUsername());
         Object obj = dbApi.makeGetCall(endPoint,"",queryParams);
         ObjectMapper objectMapper = new ObjectMapper();
 
-        Organization org = objectMapper.convertValue(obj, Organization.class);
+        Map<String,Object> map = objectMapper.convertValue(obj,Map.class);
+        Object ob = map.get("body");
+        Organization org = objectMapper.convertValue(ob, Organization.class);
 
         String actualPassword = request.getPassword();
         if(passwordEncoder.matches(actualPassword,org.getPassword())){
             return true;
         }
         return false;
+    }
+
+
+    public void inviteMember(String username, String inviteEmail,String role) {
+        String endPoint = dbUrl+"/db/api/org/get";
+        HashMap<String, String> queryParams = new HashMap<>();
+        queryParams.put("orgEmail", username);
+        Object obj = dbApi.makeGetCall(endPoint,"",queryParams);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Map<String,Object> map = objectMapper.convertValue(obj,Map.class);
+        Object ob = map.get("body");
+        Organization org = objectMapper.convertValue(ob, Organization.class);
+        UUID orgId = org.getId();
+        dbApi.createUser(inviteEmail,role,orgId);
+        System.out.println("invited successfully");
+
     }
 }

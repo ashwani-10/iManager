@@ -5,6 +5,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -17,13 +18,13 @@ public class ApiUtilImpl implements ApiUtil{
 
 
     @Override
-    public ResponseEntity makePostCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams) {
+    public ResponseEntity<Object> makePostCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams) {
         String url = endPoint;
         url = addQueryParams(url, queryParams);
         URI finalUrl = URI.create(url);
         RequestEntity req = RequestEntity.post(finalUrl).body(requestBody);
         try{
-            ResponseEntity<String> resp = restTemplate.exchange(finalUrl, HttpMethod.POST, req, String.class);
+            ResponseEntity<Object> resp = restTemplate.exchange(finalUrl, HttpMethod.POST, req, Object.class);
             return resp;
         }catch (Exception e){
             throw e;
@@ -48,7 +49,7 @@ public class ApiUtilImpl implements ApiUtil{
     }
 
     @Override
-    public Object makePutCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams){
+    public ResponseEntity makePutCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams){
         String url = apiUrl + "/" + endPoint;
 
         url = addQueryParams(url, queryParams);
@@ -61,7 +62,7 @@ public class ApiUtilImpl implements ApiUtil{
 
         try{
             ResponseEntity<Object> resp  = restTemplate.exchange(finalURL, HttpMethod.PUT, request, Object.class);
-            return resp.getBody();
+            return resp;
         }catch (Exception e){
             throw e;
         }
@@ -69,7 +70,7 @@ public class ApiUtilImpl implements ApiUtil{
     }
 
     @Override
-    public Object makeGetCall(String endPoint, String apiUrl, HashMap<String, String> queryParams) {
+    public ResponseEntity makeGetCall(String endPoint, String apiUrl, HashMap<String, String> queryParams) {
         String url = endPoint;
 
         url = addQueryParams(url, queryParams);
@@ -77,8 +78,7 @@ public class ApiUtilImpl implements ApiUtil{
         URI finalURL = URI.create(url);
         RequestEntity request = RequestEntity.get(finalURL).build();
         try {
-            ResponseEntity<Object> resp  = restTemplate.exchange(url, HttpMethod.GET, request, Object.class);
-            return resp.getBody();
+            return restTemplate.exchange(finalURL,HttpMethod.GET,request,Object.class);
         }catch (Exception e){
             throw e;
         }

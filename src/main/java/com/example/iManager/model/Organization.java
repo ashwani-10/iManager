@@ -24,7 +24,20 @@ public class Organization {
 
     private List<Project> projects;
 
+    private String orderId;
+
     public Organization() {
+    }
+
+    public Organization(UUID id, String name, String email, String password, Subscription subscription, List<User> users, List<Project> projects, String orderId) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.subscription = subscription;
+        this.users = users;
+        this.projects = projects;
+        this.orderId = orderId;
     }
 
     public UUID getId() {
@@ -83,13 +96,11 @@ public class Organization {
         this.projects = projects;
     }
 
-    public Organization(UUID id, String name, String email, String password, Subscription subscription, List<User> users, List<Project> projects) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.subscription = subscription;
-        this.users = users;
-        this.projects = projects;
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 }
