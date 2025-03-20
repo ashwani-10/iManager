@@ -6,6 +6,8 @@ import com.example.iManager.requestDTO.ProjectRequestDTO;
 import com.example.iManager.requestDTO.TaskRequestDTO;
 import com.example.iManager.requestDTO.UserRequestDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
@@ -43,7 +45,8 @@ public class DbApi extends ApiUtilImpl{
         System.out.println("payment api hit kardiya ");
         try {
             String endpoint = dbUrl+"/db/api/payment/request";
-            makePostCall(payment, endpoint, "", new HashMap<>());
+            RequestEntity request = RequestEntity.post(endpoint).body(payment);
+            ResponseEntity<String> response = restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
             System.out.println("Succesfull payment saved");
         }catch (Exception e){
             System.out.println("Fail ho gaya");
@@ -68,13 +71,15 @@ public class DbApi extends ApiUtilImpl{
         params.put("userEmail",userEmail);
         params.put("userRole",role);
         params.put("orgId",""+orgId);
-        ResponseEntity response = makePostCall(null, endpoint, "", params);
+        String url = addQueryParams(endpoint,params);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, null, String.class);
         System.out.println(response);
     }
 
     public void finalizeUser(UserRequestDTO userRequestDTO){
         String endpoint = dbUrl+"/db/api/user/finalize";
-        ResponseEntity response = makePostCall(userRequestDTO,endpoint,"",new HashMap<>());
+        RequestEntity request = RequestEntity.post(endpoint).body(userRequestDTO);
+        ResponseEntity<String> response = restTemplate.exchange(endpoint, HttpMethod.POST, request, String.class);
         System.out.println(response);
     }
 

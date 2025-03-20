@@ -18,13 +18,13 @@ public class ApiUtilImpl implements ApiUtil{
 
 
     @Override
-    public ResponseEntity<Object> makePostCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams) {
+    public ResponseEntity makePostCall(Object requestBody, String endPoint, String apiUrl, HashMap<String, String > queryParams) {
         String url = endPoint;
         url = addQueryParams(url, queryParams);
         URI finalUrl = URI.create(url);
         RequestEntity req = RequestEntity.post(finalUrl).body(requestBody);
         try{
-            ResponseEntity<Object> resp = restTemplate.exchange(finalUrl, HttpMethod.POST, req, Object.class);
+            ResponseEntity resp = restTemplate.exchange(finalUrl, HttpMethod.POST, req, Object.class);
             return resp;
         }catch (Exception e){
             throw e;
