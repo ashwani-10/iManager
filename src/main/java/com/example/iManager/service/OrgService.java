@@ -7,6 +7,7 @@ import com.example.iManager.model.OTP;
 import com.example.iManager.model.Organization;
 import com.example.iManager.requestDTO.LoginRequestDTO;
 import com.example.iManager.requestDTO.OrgRequestDTO;
+import com.example.iManager.requestDTO.UserRequestDTO;
 import com.example.iManager.util.DbApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,17 +26,16 @@ public class OrgService {
     private final KafkaProducerService kafkaProducer;
     private final DbApi dbApi;
     private final PasswordEncoder passwordEncoder;
-    private final PaymentService paymentService;
     @Value("${service.db.url}")
     private String dbUrl;
 
-    public OrgService(OtpService otpService, Mapper mapper, KafkaProducerService kafkaProducer, DbApi dbApi, PasswordEncoder passwordEncoder, PaymentService paymentService) {
+    public OrgService(OtpService otpService, Mapper mapper, KafkaProducerService kafkaProducer,
+                      DbApi dbApi, PasswordEncoder passwordEncoder) {
         this.otpService = otpService;
         this.mapper = mapper;
         this.kafkaProducer = kafkaProducer;
         this.dbApi = dbApi;
         this.passwordEncoder = passwordEncoder;
-        this.paymentService = paymentService;
     }
 
     public void orgRegistration(OrgRequestDTO request){
@@ -83,22 +83,42 @@ public class OrgService {
         }
     }
 
-    public boolean userLogin(LoginRequestDTO request) throws IOException {
+    public OrgRequestDTO orgLogin(LoginRequestDTO request) throws IOException {
         String endPoint = dbUrl+"/db/api/org/get";
         HashMap<String, String> queryParams = new HashMap<>();
         queryParams.put("orgEmail", request.getUsername());
-        Object obj = dbApi.makeGetCall(endPoint,"",queryParams);
+        Object obj = dbApi.makeGetCall(endPoint,"",queryParams).getBody();
+        if(obj == null){
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        OrgRequestDTO org = objectMapper.convertValue(obj, OrgRequestDTO.class);
+
+        String actualPassword = request.getPassword();
+        if(passwordEncoder.matches(actualPassword,org.getPassword())){
+            org.setPassword(null);
+            return org;
+        }
+        return null;
+    }
+
+    public UserRequestDTO userLogin(LoginRequestDTO request) throws IOException {
+        String endPoint = dbUrl+"/db/api/user/get/"+request.getUsername();
+        Object obj = dbApi.makeGetCall(endPoint,"",new HashMap<>());
+
         ObjectMapper objectMapper = new ObjectMapper();
 
         Map<String,Object> map = objectMapper.convertValue(obj,Map.class);
         Object ob = map.get("body");
-        Organization org = objectMapper.convertValue(ob, Organization.class);
+        UserRequestDTO user = objectMapper.convertValue(ob, UserRequestDTO.class);
 
         String actualPassword = request.getPassword();
-        if(passwordEncoder.matches(actualPassword,org.getPassword())){
-            return true;
+        if(passwordEncoder.matches(actualPassword,user.getPassword())){
+            user.setPassword(null);
+            return user;
         }
-        return false;
+        return null;
     }
 
 
@@ -111,7 +131,7 @@ public class OrgService {
 
         Map<String,Object> map = objectMapper.convertValue(obj,Map.class);
         Object ob = map.get("body");
-        Organization org = objectMapper.convertValue(ob, Organization.class);
+        OrgRequestDTO org = objectMapper.convertValue(ob, OrgRequestDTO.class);
         UUID orgId = org.getId();
         dbApi.createUser(inviteEmail,role,orgId);
         System.out.println("invited successfully");

@@ -17,6 +17,8 @@ import java.util.UUID;
 public class DbApi extends ApiUtilImpl{
     @Value("${service.db.url}")
     private String dbUrl;
+    @Value("${service.payment.url}")
+    private String paymentUrl;
 
     public void createOrg(Organization org ){
         System.out.println("hit kardiya ");
@@ -57,9 +59,10 @@ public class DbApi extends ApiUtilImpl{
     public void checkDocker() {
         System.out.println("in checkDocker method");
         try{
-            String endpoint = dbUrl+"/db/api/org/docker";
-            makeGetCall(endpoint,"",new HashMap<>());
-            System.out.println("Kuch response mila hai");
+            String endpoint = paymentUrl+"/api/payments/docker";
+            RequestEntity req = RequestEntity.get(endpoint).build();
+            ResponseEntity response = restTemplate.exchange(endpoint,HttpMethod.GET,req,String.class);
+            System.out.println(response.getBody());
         }catch (Exception e){
             System.out.println("Failed calling db docker");
         }

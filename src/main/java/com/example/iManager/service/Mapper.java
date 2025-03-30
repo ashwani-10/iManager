@@ -4,13 +4,11 @@ import com.example.iManager.enums.PaymentStatus;
 import com.example.iManager.model.Organization;
 import com.example.iManager.model.Payment;
 import com.example.iManager.model.User;
-import com.example.iManager.requestDTO.LoginRequestDTO;
 import com.example.iManager.requestDTO.OrgRequestDTO;
 import com.example.iManager.requestDTO.UserRequestDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

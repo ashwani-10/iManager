@@ -4,6 +4,7 @@ import com.example.iManager.jwtconfig.JwtUtil;
 import com.example.iManager.model.Payment;
 import com.example.iManager.requestDTO.LoginRequestDTO;
 import com.example.iManager.requestDTO.OrgRequestDTO;
+import com.example.iManager.requestDTO.UserRequestDTO;
 import com.example.iManager.service.Mapper;
 import com.example.iManager.service.OrgService;
 import com.example.iManager.util.DbApi;
@@ -14,11 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/org")
-@CrossOrigin("*")
 public class OrgController {
 
     @Autowired
@@ -63,12 +64,25 @@ public class OrgController {
     @PostMapping("/login")
     public ResponseEntity userLogin(@RequestBody LoginRequestDTO request) throws IOException {
 
-        if(orgService.userLogin(request)){
+        OrgRequestDTO requestDTO = orgService.orgLogin(request);
+        UserRequestDTO userRequestDTO = null;
+        if (requestDTO == null){
+            userRequestDTO = orgService.userLogin(request);
+        }
+        try {
             String token = jwtUtil.generateToken(request.getUsername());
             System.out.println(token);
-            return new ResponseEntity(token,HttpStatus.OK);
+            Map<String, Object> details = new HashMap<>();
+            details.put("token", token);
+            if (requestDTO != null) {
+                details.put("data", requestDTO);
+            } else {
+                details.put("data", userRequestDTO);
+            }
+            return new ResponseEntity(details, HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity("Invalid Creds", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity("Invalid Creds",HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/test")
