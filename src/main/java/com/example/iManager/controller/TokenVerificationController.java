@@ -27,7 +27,7 @@ public class TokenVerificationController {
         System.out.println("endpoint hit hua");
         if(jwtUtil.validateToken(token,username)){
             System.out.println("Token Verified");
-            return new ResponseEntity("Token Verified", HttpStatus.OK);
+            return new ResponseEntity(username, HttpStatus.OK);
         }else{
             System.out.println("Token not verified");
             return new ResponseEntity("Invalid Token", HttpStatus.UNAUTHORIZED);

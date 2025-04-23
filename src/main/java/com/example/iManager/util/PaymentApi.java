@@ -17,12 +17,17 @@ public class PaymentApi extends ApiUtilImpl{
     private String paymentUrl;
 
     public ResponseEntity payment(int amount,String currency){
-        String endpoint = paymentUrl+"/api/payments/create-order";
-        HashMap<String, String> params = new HashMap<>();
-        params.put("amount",""+amount);
-        params.put("currency",currency);
-        System.out.println("payment api hiting");
-        return this.makePostCall(null,endpoint,"",params);
+        try {
+            String endpoint = paymentUrl + "/api/payments/create-order";
+            HashMap<String, String> params = new HashMap<>();
+            params.put("amount", "" + amount);
+            params.put("currency", currency);
+            System.out.println("payment api hiting");
+            return this.makePostCall(null, endpoint, "", params);
+        }catch (Exception e){
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
