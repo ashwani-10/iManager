@@ -14,38 +14,18 @@ public class UserRequestDTO {
     String password;
     Role role;
     UUID orgId;
-    String orgName;
-    String logoUrl;
 
     public UserRequestDTO() {
     }
 
     public UserRequestDTO(UUID id, String name, String email, String password,
-                          Role role, UUID orgId, String orgName, String logoUrl) {
+                          Role role, UUID orgId) {
         this.id = id;
         this.name = name;
         Email = email;
         this.password = password;
         this.role = role;
         this.orgId = orgId;
-        this.orgName = orgName;
-        this.logoUrl = logoUrl;
-    }
-
-    public String getOrgName() {
-        return orgName;
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
     }
 
     public UUID getId() {

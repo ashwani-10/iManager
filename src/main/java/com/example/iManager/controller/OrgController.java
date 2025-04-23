@@ -63,7 +63,7 @@ public class OrgController {
 
     @PostMapping("/login")
     public ResponseEntity userLogin(@RequestBody LoginRequestDTO request) throws IOException {
-        System.out.println("login method hit hua hh");
+
         OrgRequestDTO requestDTO = orgService.orgLogin(request);
         UserRequestDTO userRequestDTO = null;
         if (requestDTO == null){
