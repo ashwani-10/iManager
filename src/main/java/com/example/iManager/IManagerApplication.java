@@ -7,7 +7,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class IManagerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IManagerApplication.class, args);
-	}
+//		ConfigurableApplicationContext context =
+				SpringApplication.run(IManagerApplication.class, args);
+
+/*
+		String[] beans = context.getBeanDefinitionNames();
+		for(String bean : beans){
+			System.out.println(bean);
+		}
+*/
+    }
 
 }
